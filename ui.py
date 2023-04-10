@@ -25,16 +25,36 @@ class QuizInterface:
                                                      font=("Arial",20,"italic"))
 
         self.tick_image=PhotoImage(file="images/true.png")
-        self.tick_button = Button(image=self.tick_image,highlightthickness=0)
+        self.tick_button = Button(image=self.tick_image,highlightthickness=0,command=self.true_button)
         self.tick_button.grid(row=2,column=0)
 
         self.cross_image = PhotoImage(file="images/false.png")
-        self.cross_button = Button(image=self.cross_image, highlightthickness=0)
+        self.cross_button = Button(image=self.cross_image, highlightthickness=0,command=self.false_button)
         self.cross_button.grid(row=2, column=1)
+
         self.get_next_question()
         self.window.mainloop()
 
     def get_next_question(self):
-        q_text = self.quiz.next_question()
-        self.canvas.itemconfig(self.question_text,text=q_text)
+        self.canvas.config(bg="white")
+        if self.quiz.still_has_questions():
+            self.score_label.config(text=f"Score: {self.quiz.score}")
+            q_text = self.quiz.next_question()
+            self.canvas.itemconfig(self.question_text,text=q_text)
+        else:
+            self.canvas.itemconfig(self.question_text,text="You've reached the end!")
+            self.cross_button.config(state="disabled")
+            self.tick_button.config(state="disabled")
 
+    def true_button (self):
+        self.give_feedback(self.quiz.check_answer("True"))
+
+    def false_button(self):
+        self.give_feedback(self.quiz.check_answer("False"))
+
+    def give_feedback(self,is_correct):
+        if is_correct:
+            self.canvas.config(bg="green")
+        else:
+            self.canvas.config(bg="red")
+        self.window.after(1000,self.get_next_question)
